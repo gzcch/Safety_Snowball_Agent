@@ -40,7 +40,7 @@ conda env create -f environment_vila.yml
 3. Obtain Results on open-sourced LVLMs:
 
 ```bash
-python SSA_opensource_framework.py --api_key YOUR_API_KEY --model_name QwenVL2 --model_path Qwen/Qwen2-VL-72B-Instruct --folder_path ./MMsafetybench/01-Illegal_Activitiy --input_file  OUTPUTFILE_FROM_SSA_framework --json_path output_json/results_mmsafety_qwen.json
+python SSA_open_source_framework.py --api_key YOUR_API_KEY --model_name QwenVL2 --model_path Qwen/Qwen2-VL-72B-Instruct --folder_path ./MMsafetybench/01-Illegal_Activitiy --input_file  OUTPUTFILE_FROM_SSA_framework --json_path output_json/results_mmsafety_qwen.json
 ```
 
 ### Arguments:
