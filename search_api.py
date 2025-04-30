@@ -15,6 +15,7 @@ class CrawlerGoogleImages:
 
     def init_browser(self):
         chrome_options = webdriver.ChromeOptions()
+
         chrome_options.add_argument("--disable-infobars")
         chrome_options.add_argument("--lang=en-US")
         chrome_options.add_argument("--headless")  # 无头模式，隐藏浏览器窗口
@@ -23,7 +24,9 @@ class CrawlerGoogleImages:
         chrome_options.add_argument("--no-sandbox")  # 适用于Linux系统，防止无权限问题
         chrome_options.add_argument("--disable-dev-shm-usage")  # 避免/dev/shm共享内存空间不足的问题
 
+        chrome_options.add_argument("--remote-debugging-port=1255")  # 远程调试端口
         browser = webdriver.Chrome(options=chrome_options)
+
         browser.get(self.url)
         browser.maximize_window()
         return browser
@@ -32,9 +35,11 @@ class CrawlerGoogleImages:
         img_url_dic = []
         img_list = []
         pos = 0
+        max_attempts = 200  # 最大检索次数
+        attempts = 0  # 当前尝试次数
 
-        # Scroll and find images until the desired number of high-resolution images is collected
-        while len(img_list) < num_images:
+        # Scroll and find images until the desired number of high-resolution images is collected or max_attempts is reached
+        while len(img_list) < num_images and attempts < max_attempts:
             pos += 500
             js = 'var q=document.documentElement.scrollTop=' + str(pos)
             browser.execute_script(js)
@@ -46,6 +51,16 @@ class CrawlerGoogleImages:
 
             try:
                 img_elements = browser.find_elements(By.TAG_NAME, 'img')
+                session = requests.Session()
+                session.trust_env = False
+
+                # 如果梯子是 HTTP 代理，可以这样配置
+                # 但要注意，如果梯子不支持 HTTPS，就不要在这里配置 'https' 键
+                proxies = {
+                    "http": "http://127.0.0.1:1080",  # 你的HTTP代理
+                    "https": "http://127.0.0.1:1080",  # 不支持HTTPS就先不填这个
+                }
+                session.proxies.update(proxies)
                 for img_element in img_elements:
                     if len(img_list) >= num_images:
                         break
@@ -66,12 +81,17 @@ class CrawlerGoogleImages:
 
                             session = requests.Session()
                             session.trust_env = False
+                            proxies = {
+                                "http": "http://127.0.0.1:1080",  # 你的HTTP代理
+                                "https": "http://127.0.0.1:1080",  # 不支持HTTPS就先不填这个
+                            }
+                            session.proxies.update(proxies)
                             r = session.get(url=img_url)
 
                             try:
                                 img = Image.open(BytesIO(r.content))
                                 width, height = img.size
-                                if width > 100 and height > 100:  # Ensure it's a high-resolution image
+                                if width > 50 and height > 50:  # Ensure it's a high-resolution image
                                     img_list.append(img)  # Add the image object to the list
                                     if len(img_list) >= num_images:
                                         break
@@ -82,6 +102,11 @@ class CrawlerGoogleImages:
                                 print(f"Failed to process image: {e}")
             except Exception as e:
                 print(f"An error occurred: {e}")
+
+            attempts += 1  # Increment the attempts counter
+
+        if attempts >= max_attempts:
+            print("Reached maximum number of attempts. Returning collected images.")
 
         return img_list  # Return the list of image objects
 
