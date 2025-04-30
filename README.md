@@ -100,4 +100,4 @@ Each object captures the full pipeline artefacts for one **input image**.
 
 
 ```
-****
+
