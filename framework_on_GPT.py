@@ -281,7 +281,7 @@ def main(argv: List[str] | None = None) -> None:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     clip_model, clip_preprocess = clip.load("ViT-B/32", device=device)
 
-    gpt_assistant = GPTImageAssistant(args.gpt4v_api)   # type: ignore[arg-type]
+    gpt_assistant = GPTImageAssistant(args.openai_api_key)   # type: ignore[arg-type]
     openai_client = OpenAI(api_key=args.openai_api_key)  # type: ignore[arg-type]
 
     analyse_images(
