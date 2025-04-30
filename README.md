@@ -14,21 +14,6 @@ For VILA
 ```bash
 conda env create -f environment_vila.yml
 ```
-```markdown
-# Danger-Behaviour QA Generator
-
-A script that scans images for severe or harmful behaviour, generates two rounds
-of vision–language questions &amp; answers, creates a *“jailbreak”* image for
-each case, and moderates the final content with OpenAI.
-
----
-
-```markdown
-# Danger-Behaviour QA Generator
-
-A toolkit that scans images for severe or harmful behaviour, generates two
-rounds of vision–language Q & A, creates a *“jailbreak”* image for each case,
-and moderates the final content with OpenAI.
 
 ---
 
