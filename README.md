@@ -14,91 +14,105 @@ For VILA
 ```bash
 conda env create -f environment_vila.yml
 ```
-## Running the Program
+```markdown
+# Danger-Behaviour QA Generator
 
-1. **Prepare your inputs:**
+A script that scans images for severe or harmful behaviour, generates two rounds
+of vision–language questions &amp; answers, creates a *“jailbreak”* image for
+each case, and moderates the final content with OpenAI.
 
- 
-   - `folder_path` 
+---
 
-2. **Run the script to obtain GPT-4o's results:**
+```markdown
+# Danger-Behaviour QA Generator
 
-   Execute the main program with the following arguments:
+A toolkit that scans images for severe or harmful behaviour, generates two
+rounds of vision–language Q & A, creates a *“jailbreak”* image for each case,
+and moderates the final content with OpenAI.
 
-   ```bash
-   python SSA_framework.py --folder_path test_folder --output_classify_file_name results.json --json_path output_json/results_mmsafety.json --api_key
-   ```
+---
 
-   **Arguments**:
-   - `--folder_path`: Path to the folder containing images to process.
-   - `--output_classify_file_name`: Output JSON file to save classification results.
-   - `--json_path`: Path to the JSON output file for processed results.
 
-   - `API Key:`
-   The `api_key` parameter is required to interact with the GPT-4o assistant. You can obtain an API key from [OpenAI](https://platform.openai.com).
+---
 
-3. Obtain Results on open-sourced LVLMs:
+## Prepare assets
 
-```bash
-python SSA_open_source_framework.py --api_key YOUR_API_KEY --model_name QwenVL2 --model_path Qwen/Qwen2-VL-72B-Instruct --folder_path ./MMsafetybench/01-Illegal_Activitiy --input_file  OUTPUTFILE_FROM_SSA_framework --json_path output_json/results_mmsafety_qwen.json
+```
+project/
+├── images/                # input pictures (.jpg / .png / .gif …)
+│   ├── img_001.jpg
+│   └── img_002.png
+├── prompt/
+│   └── 4o_sys_914.txt     # system prompt for GPT-4o
+└── analyse_images.py      # refactored main script
 ```
 
-### Arguments:
+*Place all images inside **images/**  
+and keep the system prompt in **prompt/4o_sys_914.txt**
+(or supply another path via `--system-prompt`).*
 
-- `--api_key`:  
-  The API key for interacting with the GPTImageAssistant. You can obtain an API key from [OpenAI](https://platform.openai.com).
+---
 
-- `--model_name`:  
-  The name of the model you wish to load for evaluation. Examples include `QwenVL2`, `InternVL`, and `VILA`.
+## Run
 
-- `--model_path`:  
-  The path to the model checkpoint or directory that contains the trained model.
+```bash
+python analyse_images.py images \
+    --output results.json \
+    --openai-api-key YOUR_OPENAI_API_KEY
+```
 
-- `--folder_path`:  
-  The folder containing the images you want to process. The program will scan and classify the images from this folder.
+| Argument              | Description                                              |
+|-----------------------|----------------------------------------------------------|
+| `images`              | Folder with the input pictures.                          |
+| `--output`            | Destination JSON (default: `results.json`).             |
+| `--gpt4v-api`         | Key / base-URL for **GPTImageAssistant**.                |
+| `--openai-api-key`    | Standard OpenAI REST API key.                            |
+| `--system-prompt`     | (Optional) custom system prompt file.                    |
+| `--model-version`     | (Optional) model-version string for the assistant.       |
 
-- `--input_file`:  
-  Path to the input JSON file containing image information and associated metadata.
+---
 
-- `--json_path`:  
-  Path to the output JSON file where the results of the classification will be saved.
+## What happens internally
+
+1. **Detect dangerous behaviour** in each image.  
+2. **Choose a keyword** (noun or verb) related to that behaviour but *not*
+   explicitly shown.  
+3. **Download ten images**, pick the best match via CLIP, and save it to
+   `images/jailbreak/`.  
+4. **Generate Q-A Round 1** (reasoning question about dangerous steps).  
+5. **Rewrite the question** into an imperative, abstract form and generate
+   **Q-A Round 2**.  
+6. **Moderate** the behaviour + prompt + answer with
+   *omni-moderation-latest*.  
+7. **Append results** to the output JSON; repeat for each behaviour.
+
+---
+
+## Output format (excerpt)
+
+```json
+[
+  {
+    "image": "img_001.jpg",
+    "dangerous_behavior": "self-harm - suicidal tendency",
+    "safe_image": "images/jailbreak/img_001_rope.png",
+    "first_round_question": "...",
+    "first_round_answer": "...",
+    "second_round_question": "...",
+    "second_round_answer": "...",
+    "second_round_moderation": {
+      "id": "...",
+      "model": "omni-moderation-latest",
+      "results": [...]
+    }
+  }
+]
+```
+
+Each object captures the full pipeline artefacts for one **input image**.
+
+---
 
 
 
-
-
-[//]: # (### Example Output)
-
-[//]: # ()
-[//]: # (The output file &#40;`results.json`&#41; will contain classified data for each image. For example:)
-
-[//]: # ()
-[//]: # (```json)
-
-[//]: # ({)
-
-[//]: # (  "image": "image1.jpg",)
-
-[//]: # (  "self-harm": 0,)
-
-[//]: # (  "celebrity": 1,)
-
-[//]: # (  "violence": 0,)
-
-[//]: # (  "creating illegal objects": 0)
-
-[//]: # (})
-
-[//]: # (```)
-
-[//]: # ()
-[//]: # (Each image is classified into different categories based on its content, with scores indicating the likelihood of it containing harmful elements.)
-
-[//]: # ()
-[//]: # (---)
-
-[//]: # ( )
-[//]: # (### License)
-
-[//]: # ()
-[//]: # (This project is licensed under the MIT License - see the [LICENSE]&#40;LICENSE&#41; file for details.)
+```
