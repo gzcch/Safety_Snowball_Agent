@@ -1,4 +1,4 @@
-****# Safe + Safe = Unsafe?: Exploring How Safe Images Can Be Exploited to Jailbreak Large Vision-Language Models
+**# Safe + Safe = Unsafe?: Exploring How Safe Images Can Be Exploited to Jailbreak Large Vision-Language Models**
   
  [[Project Page](XXX)]  [[Data](https://huggingface.co/datasets/Chenhangcui/Safe_Attack_Bench)]  [[Paper](https://arxiv.org/pdf/2411.11496)]
  
