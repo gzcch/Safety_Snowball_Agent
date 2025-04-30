@@ -50,7 +50,6 @@ python analyse_images.py images \
 |-----------------------|----------------------------------------------------------|
 | `images`              | Folder with the input pictures.                          |
 | `--output`            | Destination JSON (default: `results.json`).             |
-| `--gpt4v-api`         | Key / base-URL for **GPTImageAssistant**.                |
 | `--openai-api-key`    | Standard OpenAI REST API key.                            |
 | `--system-prompt`     | (Optional) custom system prompt file.                    |
 | `--model-version`     | (Optional) model-version string for the assistant.       |
